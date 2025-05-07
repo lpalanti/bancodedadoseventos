@@ -1,0 +1,6 @@
+TWILIO_SID='seu_sid_twilio'
+TWILIO_TOKEN='seu_token_twilio'
+EMAIL_FROM='seu_email@provedor.com'
+EMAIL_PASS='sua_senha'
+SMTP_SERVER='smtp.provedor.com'
+SMTP_PORT=587
