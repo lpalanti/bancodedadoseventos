@@ -49,18 +49,3 @@ elif choice == "⚙️ Perfil":
     user_profile(authenticator)
 elif choice == "💳 Planos e Pagamentos":
     show_plans()
-
-def login(authenticator):
-    name, authentication_status, username = authenticator.login('Login', 'main')
-    if authentication_status == False:
-        st.error("Username/password incorretos")
-    elif authentication_status == None:
-        st.warning("Por favor insira seu username e password")
-
-def logout(authenticator):
-    authenticator.logout('Logout', 'main')
-    st.experimental_rerun()
-
-def reset_password(authenticator):
-    if authenticator.reset_password(st.session_state['username']):
-        st.success("Senha modificada com sucesso")
