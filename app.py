@@ -4,7 +4,6 @@ import uuid
 import os
 import smtplib
 from email.mime.text import MIMEText
-from twilio.rest import Client
 from dotenv import load_dotenv
 
 # Configurações iniciais
@@ -16,15 +15,6 @@ def init_db():
     conn = sqlite3.connect('eventos.db')
     c = conn.cursor()
     
-    # Tabela de Usuários
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY, 
-                  username TEXT UNIQUE, 
-                  email TEXT, 
-                  password TEXT, 
-                  subscription_type TEXT)''')
-    
-    # Tabela de Fornecedores
     c.execute('''CREATE TABLE IF NOT EXISTS suppliers
                  (id INTEGER PRIMARY KEY,
                   name TEXT,
@@ -41,43 +31,9 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ------------ FUNÇÕES DE AUTENTICAÇÃO ------------
-def login():
-    with st.form("Login"):
-        username = st.text_input("Usuário")
-        password = st.text_input("Senha", type="password")
-        
-        if st.form_submit_button("Entrar"):
-            conn = sqlite3.connect('eventos.db')
-            c = conn.cursor()
-            c.execute('SELECT * FROM users WHERE username=? AND password=?', (username, password))
-            user = c.fetchone()
-            conn.close()
-            
-            if user:
-                st.session_state.user = user
-                st.rerun()
-            else:
-                st.error("Credenciais inválidas")
-
 # ------------ FUNÇÕES DE MENSAGEM ------------
 def send_validation(supplier):
-    # Envio por WhatsApp (Twilio)
-    try:
-        client = Client(os.getenv('TWILIO_SID'), os.getenv('TWILIO_TOKEN'))
-        message = client.messages.create(
-            body=f"""Confirme seu cadastro:
-            1 - Confirmar
-            2 - Corrigir
-            3 - Remover
-            Token: {supplier['validation_token']}""",
-            from_='whatsapp:+14155238886',
-            to=f'whatsapp:{supplier["phone1"]}'
-        )
-    except Exception as e:
-        st.error(f"Erro no WhatsApp: {e}")
-
-    # Envio por E-mail
+    # Versão simplificada sem WhatsApp
     try:
         msg = MIMEText(f"""Valide seu cadastro:
         Token: {supplier['validation_token']}
@@ -90,6 +46,7 @@ def send_validation(supplier):
             server.starttls()
             server.login(os.getenv('EMAIL_FROM'), os.getenv('EMAIL_PASS'))
             server.sendmail(os.getenv('EMAIL_FROM'), supplier['email'], msg.as_string())
+        st.success("E-mail de confirmação enviado!")
     except Exception as e:
         st.error(f"Erro no e-mail: {e}")
 
@@ -120,7 +77,6 @@ def supplier_form():
                            data['city'], data['category'], data['description'], data['validation_token'], False))
                 conn.commit()
                 send_validation(data)
-                st.success("Cadastro realizado! Verifique seu WhatsApp e e-mail para validar")
             except sqlite3.IntegrityError:
                 st.error("CNPJ já cadastrado")
             finally:
@@ -130,16 +86,9 @@ def supplier_form():
 def main():
     init_db()
     
-    if 'user' not in st.session_state:
-        login()
-        st.stop()
+    st.sidebar.title("EventosPro")
     
-    st.sidebar.title(f"Bem-vindo, {st.session_state.user[1]}!")
-    if st.sidebar.button("Sair"):
-        del st.session_state.user
-        st.rerun()
-    
-    menu = st.sidebar.radio("Menu", ["Dashboard", "Cadastro", "Perfil"])
+    menu = st.sidebar.radio("Menu", ["Dashboard", "Cadastro"])
     
     if menu == "Dashboard":
         st.header("Fornecedores Cadastrados")
