@@ -7,5 +7,4 @@ python-dotenv
 bcrypt
 pyyaml
 pytz==2023.3.post1
-smtplib
 email-validator
