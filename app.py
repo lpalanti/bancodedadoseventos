@@ -72,18 +72,53 @@ def login_page():
                     st.error("E-mail ou senha inválidos.")
 
         st.markdown("[Esqueci minha senha](#)")
-        st.markdown("Não tem conta? [Cadastre-se](#)")
+        if st.button("Não tem conta? Cadastre-se aqui"):
+        st.session_state.page = "register"
+
 
     with col2:
         st.image("rocket_login.png", caption="", use_container_width=True)
+
+def register_page():
+    st.title("📋 Cadastro de Fornecedor")
+    st.markdown("Cadastre-se para ter acesso à plataforma.")
+
+    with st.form("form_cadastro"):
+        fornecedor = st.text_input("Nome do Fornecedor")
+        documento = st.text_input("CNPJ ou CPF")
+        telefone1 = st.text_input("Telefone Principal")
+        telefone2 = st.text_input("Telefone Secundário")
+        email = st.text_input("E-mail")
+        linkedin = st.text_input("LinkedIn (opcional)")
+        site = st.text_input("Site (opcional)")
+        facebook = st.text_input("Facebook (opcional)")
+        instagram = st.text_input("Instagram (opcional)")
+        atuacao = st.text_area("Locais de Atuação")
+        descricao = st.text_area("Descrição do tipo de serviço prestado")
+        lgpd = st.checkbox("Autorizo o uso dos meus dados conforme a LGPD")
+
+        submitted = st.form_submit_button("Cadastrar")
+
+        if submitted:
+            if not lgpd:
+                st.error("Você precisa aceitar os termos da LGPD para continuar.")
+            elif not (fornecedor and documento and telefone1 and email and atuacao and descricao):
+                st.error("Preencha todos os campos obrigatórios.")
+            else:
+                st.success("Cadastro realizado com sucesso!")
+                # Aqui você pode salvar em CSV, Firebase, etc.
 
 # ----- Controle de sessão -----
 def main():
     if "logged_in" not in st.session_state:
         st.session_state.logged_in = False
+    if "page" not in st.session_state:
+        st.session_state.page = "login"
 
-    if not st.session_state.logged_in:
+    if st.session_state.page == "login":
         login_page()
+    elif st.session_state.page == "register":
+        register_page()
     else:
         st.success(f"Você está logado como {st.session_state.user_email}")
         st.write("👉 A próxima etapa será o painel principal do app.")
