@@ -148,9 +148,9 @@ def register_page():
                 st.error("Preencha todos os campos obrigatórios.")
             else:
                 if enviar_email_validacao(email, fornecedor):
-                st.success("Cadastro realizado! Verifique seu e-mail para validar o acesso.")
-            else:
-                st.error("Cadastro falhou no envio do e-mail. Tente novamente mais tarde.")
+                    st.success("Cadastro realizado! Verifique seu e-mail para validar o acesso.")
+                else:
+                    st.error("Cadastro falhou no envio do e-mail. Tente novamente mais tarde.")
 
 # ----- Controle de sessão -----
 def main():
