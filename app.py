@@ -75,7 +75,7 @@ def login_page():
         st.markdown("Não tem conta? [Cadastre-se](#)")
 
     with col2:
-        st.image("rocket_login.png", caption="", use_column_width=True)
+        st.image("rocket_login.png", caption="", use_container_width=True)
 
 # ----- Controle de sessão -----
 def main():
