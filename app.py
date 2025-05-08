@@ -156,6 +156,28 @@ def register_page():
                 st.error("Você precisa aceitar os termos da LGPD para continuar.")
             elif not (fornecedor and documento and telefone1 and email and atuacao and descricao):
                 st.error("Preencha todos os campos obrigatórios.")
+                dados = {
+                    "fornecedor": fornecedor,
+                    "documento": documento,
+                    "telefone1": telefone1,
+                    "telefone2": telefone2,
+                    "email": email,
+                    "linkedin": linkedin,
+                    "site": site,
+                    "facebook": facebook,
+                    "instagram": instagram,
+                    "atuacao": atuacao,
+                    "descricao": descricao,
+                    "valido": "pendente"
+}
+
+salvar_fornecedor(dados)
+
+if enviar_email_validacao(email, fornecedor):
+    st.success("Cadastro salvo com sucesso! Verifique seu e-mail para validar o acesso.")
+else:
+    st.warning("Cadastro salvo, mas houve falha no envio do e-mail.")
+
        
 # ----- Controle de sessão -----
 def main():
