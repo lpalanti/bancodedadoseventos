@@ -156,10 +156,7 @@ def register_page():
                 st.error("Você precisa aceitar os termos da LGPD para continuar.")
             elif not (fornecedor and documento and telefone1 and email and atuacao and descricao):
                 st.error("Preencha todos os campos obrigatórios.")
-            else:
-           
-
-
+       
 # ----- Controle de sessão -----
 def main():
     if "logged_in" not in st.session_state:
