@@ -1,10 +1,10 @@
+import streamlit as st
+import pandas as pd
+import hashlib
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import uuid
-import streamlit as st
-import pandas as pd
-import hashlib
 
 # ----- CSS Personalizado -----
 def inject_custom_css():
@@ -21,11 +21,6 @@ def inject_custom_css():
             height: 3em;
             width: 100%;
         }
-        .login-box {
-            max-width: 400px;
-            margin: auto;
-            padding: 30px;
-        }
         .rocket-img {
             max-width: 100%;
             height: auto;
@@ -35,12 +30,13 @@ def inject_custom_css():
         }
         </style>
     """, unsafe_allow_html=True)
-    
+
+# ----- Envio de e-mail -----
 def enviar_email_validacao(destinatario_email, nome):
     remetente = st.secrets["email_user"]
     senha = st.secrets["email_pass"]
 
-    token = str(uuid.uuid4())[:8]  # Código único
+    token = str(uuid.uuid4())[:8]
     assunto = "Validação do seu cadastro - Banco de Fornecedores"
     corpo = f"""
 Olá, {nome}!
@@ -73,8 +69,7 @@ Equipe Banco de Fornecedores
         st.error(f"Erro ao enviar e-mail: {e}")
         return False
 
-
-# ----- Banco de dados de usuários (simulado) -----
+# ----- Banco de dados de usuários -----
 def load_users():
     try:
         return pd.read_csv("users.csv")
@@ -91,17 +86,16 @@ def check_login(email, password):
         return True
     return False
 
+# ----- Salvar fornecedor -----
 def salvar_fornecedor(data):
     try:
         df = pd.read_csv("fornecedores.csv")
     except FileNotFoundError:
         df = pd.DataFrame(columns=data.keys())
-
-    df = df.append(data, ignore_index=True)
+    df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
     df.to_csv("fornecedores.csv", index=False)
 
-
-# ----- Página de Login -----
+# ----- Página de login -----
 def login_page():
     inject_custom_css()
     col1, col2 = st.columns([1, 1])
@@ -127,10 +121,10 @@ def login_page():
         if st.button("Não tem conta? Cadastre-se aqui"):
             st.session_state.page = "register"
 
-
     with col2:
         st.image("rocket_login.png", caption="", use_container_width=True)
 
+# ----- Página de cadastro -----
 def register_page():
     st.title("📋 Cadastro de Fornecedor")
     st.markdown("Cadastre-se para ter acesso à plataforma.")
@@ -156,6 +150,7 @@ def register_page():
                 st.error("Você precisa aceitar os termos da LGPD para continuar.")
             elif not (fornecedor and documento and telefone1 and email and atuacao and descricao):
                 st.error("Preencha todos os campos obrigatórios.")
+            else:
                 dados = {
                     "fornecedor": fornecedor,
                     "documento": documento,
@@ -169,16 +164,15 @@ def register_page():
                     "atuacao": atuacao,
                     "descricao": descricao,
                     "valido": "pendente"
-}
+                }
 
-salvar_fornecedor(dados)
+                salvar_fornecedor(dados)
 
-if enviar_email_validacao(email, fornecedor):
-    st.success("Cadastro salvo com sucesso! Verifique seu e-mail para validar o acesso.")
-else:
-    st.warning("Cadastro salvo, mas houve falha no envio do e-mail.")
+                if enviar_email_validacao(email, fornecedor):
+                    st.success("Cadastro salvo com sucesso! Verifique seu e-mail para validar o acesso.")
+                else:
+                    st.warning("Cadastro salvo, mas houve falha no envio do e-mail.")
 
-       
 # ----- Controle de sessão -----
 def main():
     if "logged_in" not in st.session_state:
