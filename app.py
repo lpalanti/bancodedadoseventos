@@ -147,8 +147,10 @@ def register_page():
             elif not (fornecedor and documento and telefone1 and email and atuacao and descricao):
                 st.error("Preencha todos os campos obrigatórios.")
             else:
-                st.success("Cadastro realizado com sucesso!")
-                # Aqui você pode salvar em CSV, Firebase, etc.
+                if enviar_email_validacao(email, fornecedor):
+                st.success("Cadastro realizado! Verifique seu e-mail para validar o acesso.")
+            else:
+                st.error("Cadastro falhou no envio do e-mail. Tente novamente mais tarde.")
 
 # ----- Controle de sessão -----
 def main():
