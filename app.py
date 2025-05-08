@@ -123,7 +123,7 @@ def supplier_registration_form():
             'category': st.selectbox("Categoria *", ["Hotelaria", "A&B", "Transporte", "Tecnologia", "Segurança"]),
             'description': st.text_area("Descrição dos Serviços *"),
             'validation_token': str(uuid.uuid4()),
-            'validation_expires': datetime.now(pytz.utc) + timedelta(hours=24)
+            'validation_expires': (datetime.now(pytz.utc) + timedelta(hours=24)).isoformat()  # Conversão para ISO
         }
         
         if st.form_submit_button("Cadastrar Fornecedor"):
@@ -131,13 +131,27 @@ def supplier_registration_form():
             c = conn.cursor()
             
             try:
+                # Verificação adicional de dados obrigatórios
+                required_fields = ['name', 'email', 'cnpj', 'phone1', 'city', 'category', 'description']
+                for field in required_fields:
+                    if not supplier[field]:
+                        raise ValueError(f"Campo obrigatório faltando: {field}")
+                
                 c.execute('''INSERT INTO suppliers 
                           (name, email, cnpj, phone1, phone2, city, category, description, validation_token, validation_expires)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                          (supplier['name'], supplier['email'], supplier['cnpj'], 
-                           supplier['phone1'], supplier['phone2'], supplier['city'],
-                           supplier['category'], supplier['description'], 
-                           supplier['validation_token'], supplier['validation_expires']))
+                          (
+                              supplier['name'],
+                              supplier['email'],
+                              supplier['cnpj'],
+                              supplier['phone1'],
+                              supplier['phone2'] if supplier['phone2'] else None,  # Trata campo opcional
+                              supplier['city'],
+                              supplier['category'],
+                              supplier['description'],
+                              supplier['validation_token'],
+                              supplier['validation_expires']
+                          ))
                 
                 if send_validation_email(supplier):
                     st.success("✅ Cadastro realizado! Verifique seu e-mail para validar")
@@ -145,12 +159,22 @@ def supplier_registration_form():
                     st.error("❌ Erro no envio do e-mail de confirmação")
                 
                 conn.commit()
+            
             except sqlite3.IntegrityError as e:
-                st.error(f"❌ Erro: {str(e)}")
+                conn.rollback()
+                st.error(f"❌ Erro de integridade: {str(e)}")
                 if "UNIQUE constraint failed: suppliers.cnpj" in str(e):
-                    st.error("CNPJ já cadastrado")
+                    st.error("CNPJ já cadastrado no sistema")
                 elif "UNIQUE constraint failed: suppliers.email" in str(e):
-                    st.error("E-mail já cadastrado")
+                    st.error("E-mail já cadastrado no sistema")
+            
+            except ValueError as e:
+                st.error(f"❌ {str(e)}")
+            
+            except Exception as e:
+                st.error(f"❌ Erro inesperado: {str(e)}")
+                raise e  # Mantém o traceback original para debug
+            
             finally:
                 conn.close()
 
