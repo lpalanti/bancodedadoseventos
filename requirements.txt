@@ -6,3 +6,5 @@ pandas
 python-dotenv
 bcrypt
 pyyaml
+pytz==2023.3.post1
+email-validator==2.0.0.post2
