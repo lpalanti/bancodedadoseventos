@@ -39,14 +39,15 @@ def login_page():
     st.markdown("[Esqueci minha senha](#)")
     st.markdown("Não tem conta? [Cadastre-se](#)")
 
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+def main():
+    if "logged_in" not in st.session_state:
+        st.session_state.logged_in = False
 
-if not st.session_state.logged_in:
-    login_page()
-else:
-    st.success(f"Você está logado como {st.session_state.user_email}")
-    st.write("👉 A próxima etapa será o painel principal do app.")
+    if not st.session_state.logged_in:
+        login_page()
+    else:
+        st.success(f"Você está logado como {st.session_state.user_email}")
+        st.write("👉 A próxima etapa será o painel principal do app.")
 
 if __name__ == "__main__":
     main()
