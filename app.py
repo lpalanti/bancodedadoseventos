@@ -104,3 +104,17 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+import smtplib
+
+def test_smtp():
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login("seuemail@gmail.com", "sua_senha_app")
+            print("Conexão bem-sucedida!")
+    except Exception as e:
+        print(f"Erro: {e}")
+
+test_smtp()
