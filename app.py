@@ -90,10 +90,14 @@ def check_login(email, password):
 def salvar_fornecedor(data):
     try:
         df = pd.read_csv("fornecedores.csv")
-    except FileNotFoundError:
+        if df.empty:
+            df = pd.DataFrame(columns=data.keys())
+    except (FileNotFoundError, pd.errors.EmptyDataError):
         df = pd.DataFrame(columns=data.keys())
+
     df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
     df.to_csv("fornecedores.csv", index=False)
+
 
 # ----- Página de login -----
 def login_page():
