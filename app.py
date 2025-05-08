@@ -73,7 +73,7 @@ def login_page():
 
         st.markdown("[Esqueci minha senha](#)")
         if st.button("Não tem conta? Cadastre-se aqui"):
-        st.session_state.page = "register"
+            st.session_state.page = "register"
 
 
     with col2:
