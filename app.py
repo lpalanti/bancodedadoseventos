@@ -91,6 +91,16 @@ def check_login(email, password):
         return True
     return False
 
+def salvar_fornecedor(data):
+    try:
+        df = pd.read_csv("fornecedores.csv")
+    except FileNotFoundError:
+        df = pd.DataFrame(columns=data.keys())
+
+    df = df.append(data, ignore_index=True)
+    df.to_csv("fornecedores.csv", index=False)
+
+
 # ----- Página de Login -----
 def login_page():
     inject_custom_css()
@@ -147,10 +157,28 @@ def register_page():
             elif not (fornecedor and documento and telefone1 and email and atuacao and descricao):
                 st.error("Preencha todos os campos obrigatórios.")
             else:
-                if enviar_email_validacao(email, fornecedor):
-                    st.success("Cadastro realizado! Verifique seu e-mail para validar o acesso.")
-                else:
-                    st.error("Cadastro falhou no envio do e-mail. Tente novamente mais tarde.")
+                dados = {
+                    "fornecedor": fornecedor,
+                    "documento": documento,
+                    "telefone1": telefone1,
+                    "telefone2": telefone2,
+                    "email": email,
+                    "linkedin": linkedin,
+                    "site": site,
+                    "facebook": facebook,
+                    "instagram": instagram,
+                    "atuacao": atuacao,
+                    "descricao": descricao,
+                    "valido": "pendente"
+}
+
+salvar_fornecedor(dados)
+
+if enviar_email_validacao(email, fornecedor):
+    st.success("Cadastro salvo com sucesso! Verifique seu e-mail para validar o acesso.")
+else:
+    st.warning("Cadastro salvo, mas houve falha no envio do e-mail.")
+
 
 # ----- Controle de sessão -----
 def main():
