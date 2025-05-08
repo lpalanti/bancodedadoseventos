@@ -1,3 +1,7 @@
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import uuid
 import streamlit as st
 import pandas as pd
 import hashlib
@@ -31,6 +35,44 @@ def inject_custom_css():
         }
         </style>
     """, unsafe_allow_html=True)
+    
+def enviar_email_validacao(destinatario_email, nome):
+    remetente = st.secrets["email_user"]
+    senha = st.secrets["email_pass"]
+
+    token = str(uuid.uuid4())[:8]  # Código único
+    assunto = "Validação do seu cadastro - Banco de Fornecedores"
+    corpo = f"""
+Olá, {nome}!
+
+Obrigado por se cadastrar em nossa plataforma.
+
+Para validar seu cadastro, utilize o seguinte código:
+
+📌 CÓDIGO DE VALIDAÇÃO: {token}
+
+(Em breve, o sistema de validação por clique será ativado.)
+
+Atenciosamente,
+Equipe Banco de Fornecedores
+"""
+
+    msg = MIMEMultipart()
+    msg["From"] = remetente
+    msg["To"] = destinatario_email
+    msg["Subject"] = assunto
+    msg.attach(MIMEText(corpo, "plain"))
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
+            servidor.starttls()
+            servidor.login(remetente, senha)
+            servidor.send_message(msg)
+        return True
+    except Exception as e:
+        st.error(f"Erro ao enviar e-mail: {e}")
+        return False
+
 
 # ----- Banco de dados de usuários (simulado) -----
 def load_users():
